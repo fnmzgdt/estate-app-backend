@@ -3,12 +3,28 @@ const {
   getUserById,
   registerUser,
   getUserByEmail,
+  createSession,
 } = require("../../services/users");
 const { sendResponse, sendAuthResponse } = require("../../utils/sendResponse");
 const { hashSync, genSaltSync, compareSync } = require("bcrypt");
 const { sign } = require("jsonwebtoken");
+const { signJWT, verifyJWT } = require("../../utils/jwt");
 
 module.exports = {
+  insertSession: (req, res) => {
+    const demo = {
+      user_id: "6",
+      first_name: "Paul",
+      last_name: "Jenkins",
+      email: "test@email.com",
+    };
+    createSession(demo).then((resp) => {
+      res.send(resp);
+    });
+  },
+  getMyInfo: (req, res) => {
+    return res.send(req.user);
+  },
   getUsers: (req, res) => {
     sendResponse(req, res, getUsers);
   },
@@ -41,15 +57,30 @@ module.exports = {
         const result = compareSync(params.password, results[0].password);
 
         if (result) {
-          params.password = undefined;
-          params = JSON.parse(JSON.stringify(params));
+          let claims = results[0];
+          claims.password = undefined;
+          claims = JSON.parse(JSON.stringify(claims));
 
-          const jwt = sign(params, "hashkey", { expiresIn: "16h" });
+          const sessionId = Math.floor(Date.now() / 1000);
+          createSession({ sessionId, ...claims });
 
-          res.cookie("access-token", jwt, { maxAge: 3600 * 1000 });
+          const accessToken = signJWT({ sessionId, ...claims }, "2s");
+
+          const refreshToken = signJWT({ sessionId }, "1y");
+
+          res.cookie("accessToken", accessToken, {
+            maxAge: 1000 * 300,
+            httpOnly: true,
+          });
+
+          res.cookie("refreshToken", refreshToken, {
+            maxAge: 3.154e10,
+            httpOnly: true,
+          });
+
           return res.status(200).json({
             success: 1,
-            results,
+            session: 1,
             message: "Successful Authentication!",
           });
         } else {
@@ -60,5 +91,13 @@ module.exports = {
         console.log(err);
         return res.status(500).json({ success: 0, err });
       });
+  },
+  logoutUser: (req, res) => {
+    res.cookie("accessToken", "", {
+      maxAge: 0,
+      httpOnly: true,
+    });
+
+    return res.status(200).json({ message: "Succesfully logged out" });
   },
 };
