@@ -10,7 +10,6 @@ const {
 const requireAuthentication = require("../../middleware/requireAuthentication");
 const userRouter = require("express").Router();
 
-userRouter.post("/demo", insertSession);
 userRouter.get("/me", requireAuthentication, getMyInfo);
 userRouter.get("/users", requireAuthentication, getUsers);
 userRouter.get("/user", getUserById);

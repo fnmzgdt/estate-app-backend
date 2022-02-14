@@ -11,17 +11,6 @@ const { sign } = require("jsonwebtoken");
 const { signJWT, verifyJWT } = require("../../utils/jwt");
 
 module.exports = {
-  insertSession: (req, res) => {
-    const demo = {
-      user_id: "6",
-      first_name: "Paul",
-      last_name: "Jenkins",
-      email: "test@email.com",
-    };
-    createSession(demo).then((resp) => {
-      res.send(resp);
-    });
-  },
   getMyInfo: (req, res) => {
     return res.send(req.user);
   },
@@ -48,6 +37,7 @@ module.exports = {
 
     getUserByEmail(params)
       .then((results) => {
+
         if (results.length == 0) {
           return res
             .status(400)
@@ -62,6 +52,7 @@ module.exports = {
           claims = JSON.parse(JSON.stringify(claims));
 
           const sessionId = Math.floor(Date.now() / 1000);
+
           createSession({ sessionId, ...claims });
 
           const accessToken = signJWT({ sessionId, ...claims }, "2s");
@@ -97,6 +88,13 @@ module.exports = {
       maxAge: 0,
       httpOnly: true,
     });
+
+    res.cookie("refreshToken", "", {
+      maxAge: 0,
+      httpOnly: true,
+    });
+
+    //delete session
 
     return res.status(200).json({ message: "Succesfully logged out" });
   },

@@ -34,16 +34,27 @@ module.exports = {
     ]);
   },
   getUserByEmail: ({ email }) => {
-    const query = "SELECT id, first_name, last_name, email, password FROM users WHERE email = ?";
+    const query =
+      "SELECT id, first_name, last_name, email, password FROM users WHERE email = ?";
     return MySQLquery(pool, query, [email]);
   },
   createSession: ({ sessionId, id, first_name, last_name, email }) => {
     const query =
       "INSERT INTO sessions(id, user_id, first_name, last_name, email) VALUES (?, ?, ?, ?, ?)";
-    return MySQLquery(pool, query, [sessionId, id, first_name, last_name, email]);
+    return MySQLquery(pool, query, [
+      sessionId,
+      id,
+      first_name,
+      last_name,
+      email,
+    ]);
   },
   getSession: (sessionId) => {
-    const query = "SELECT * FROM sessions WHERE id=?";
+    const query = "SELECT id as sessionId, user_id as id, first_name, last_name, email FROM sessions WHERE id=?";
+    //ADD AS TO THE COLUMN NAMES
     return MySQLquery(pool, query, [sessionId]);
   },
+  deleteSession: () => {
+    
+  }
 };
