@@ -41,10 +41,10 @@ const deserializeUser = (req, res, next) => {
     session.password = undefined
     session = JSON.parse(JSON.stringify(session));
 
-    const newAccessToken = signJWT(session, "2s");
+    const newAccessToken = signJWT(session, "5m");
 
     res.cookie("accessToken", newAccessToken, {
-      maxAge: 1000 * 300,
+      maxAge: 1000 * 60 * 60 * 24 * 14,
       httpOnly: true,
     });
 

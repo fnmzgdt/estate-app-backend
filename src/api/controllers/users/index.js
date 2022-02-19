@@ -55,12 +55,12 @@ module.exports = {
 
           createSession({ sessionId, ...claims });
 
-          const accessToken = signJWT({ sessionId, ...claims }, "2s");
+          const accessToken = signJWT({ sessionId, ...claims }, "5m");
 
           const refreshToken = signJWT({ sessionId }, "1y");
 
           res.cookie("accessToken", accessToken, {
-            maxAge: 1000 * 300,
+            maxAge: 1000 * 60 * 60 * 24 * 14,
             httpOnly: true,
           });
 
